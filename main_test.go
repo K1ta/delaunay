@@ -40,34 +40,6 @@ func TestTriangulate(t *testing.T) {
 	}
 }
 
-func Test_getCrossProductZ(t *testing.T) {
-	type args struct {
-		a Edge
-		b Edge
-	}
-	tests := []struct {
-		name string
-		args args
-		want float64
-	}{
-		{
-			name: "",
-			args: args{
-				a: Edge{A: Point{X: 1, Y: 1}, B: Point{X: 4, Y: 5}},
-				b: Edge{A: Point{X: -1, Y: 0}, B: Point{X: 6, Y: 8}},
-			},
-			want: -4,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getCrossProductZ(tt.args.a, tt.args.b); got != tt.want {
-				t.Errorf("getCrossProductZ() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_isClockwise(t *testing.T) {
 	type args struct {
 		t Triangle
@@ -84,6 +56,17 @@ func Test_isClockwise(t *testing.T) {
 					A: Point{X: 0, Y: 0},
 					B: Point{X: 0, Y: 1},
 					C: Point{X: 1, Y: 0},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "",
+			args: args{
+				t: Triangle{
+					A: Point{X: 1, Y: 0},
+					B: Point{X: 0, Y: 0},
+					C: Point{X: 0, Y: 1},
 				},
 			},
 			want: true,

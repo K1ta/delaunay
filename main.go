@@ -3,6 +3,8 @@ package delaunay
 import (
 	"errors"
 	"fmt"
+
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 type (
@@ -80,15 +82,15 @@ func getTriangleOfPoints(a, b, c Point) Triangle {
 }
 
 func isClockwise(t Triangle) bool {
-	return getCrossProductZ(Edge{A: t.A, B: t.B}, Edge{A: t.A, B: t.C}) < 0
+	var (
+		v1 = getVec3OfPoints(t.A, t.B)
+		v2 = getVec3OfPoints(t.A, t.C)
+	)
+	return v1.Cross(v2).Z() < 0
 }
 
-func getCrossProductZ(a, b Edge) float64 {
-	var (
-		na = Point{X: a.B.X - a.A.X, Y: a.B.Y - a.A.Y}
-		nb = Point{X: b.B.X - b.A.X, Y: b.B.Y - b.A.Y}
-	)
-	return na.X*nb.Y - na.Y*nb.X
+func getVec3OfPoints(from, to Point) mgl64.Vec3 {
+	return mgl64.Vec3{to.X - from.X, to.Y - from.Y, 0}
 }
 
 func getBounds(points []Point) (left, top, right, bottom float64) {
