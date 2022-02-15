@@ -85,7 +85,7 @@ func Test_isClockwise(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isClockwise(tt.args.t); got != tt.want {
+			if got := tt.args.t.isClockwise(); got != tt.want {
 				t.Errorf("isClockwise() = %v, want %v", got, tt.want)
 			}
 		})
@@ -130,8 +130,8 @@ func Test_getTriangleOfPoints(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getTriangleOfPoints(tt.args.a, tt.args.b, tt.args.c); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getTriangleOfPoints() = %v, want %v", got, tt.want)
+			if got := newTriangleFromPoints(tt.args.a, tt.args.b, tt.args.c); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newTriangleFromPoints() = %v, want %v", got, tt.want)
 			}
 		})
 	}

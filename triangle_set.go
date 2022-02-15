@@ -2,6 +2,12 @@ package delaunay
 
 type triangleSet struct {
 	triangles map[Triangle]struct{}
+
+	// Superposition points
+	leftBottom  Point
+	leftTop     Point
+	rightTop    Point
+	rightBottom Point
 }
 
 func (ts *triangleSet) Add(t Triangle) (set bool) {
