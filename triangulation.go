@@ -21,7 +21,7 @@ func Triangulate(points []Point) (_ []Triangle, err error) {
 }
 
 func createTriangleSetWithSuperposition(points []Point) triangleSet {
-	var leftBottom, leftTop, rightTop, rightBottom = getBounds(points)
+	var leftBottom, leftTop, rightTop, rightBottom = getSuperpositionBounds(points)
 
 	var set = triangleSet{
 		triangles: map[Triangle]struct{}{
@@ -37,36 +37,7 @@ func createTriangleSetWithSuperposition(points []Point) triangleSet {
 	return set
 }
 
-func addPointToTriangleSet(p Point, set triangleSet) {
-	var edges = make(map[Edge]struct{})
-	for t := range set.triangles {
-		if p.isInTriangleCircumcircle(t) {
-			set.Remove(t)
-			addEdgePointsToMap(edges, t.A, t.B)
-			addEdgePointsToMap(edges, t.B, t.C)
-			addEdgePointsToMap(edges, t.C, t.A)
-		}
-	}
-
-	var newTriangles = make([]Triangle, 0)
-	for e := range edges {
-		newTriangles = append(newTriangles, newTriangleFromPoints(e.A, e.B, p))
-	}
-
-	for _, newTriangle := range newTriangles {
-		set.Add(newTriangle)
-	}
-}
-
-func removeSuperpositionFromTriangleSet(set triangleSet) {
-	for t := range set.triangles {
-		if t.hasPoints(set.leftBottom, set.leftTop, set.rightTop, set.rightBottom) {
-			set.Remove(t)
-		}
-	}
-}
-
-func getBounds(points []Point) (leftBottom, leftTop, rightTop, rightBottom Point) {
+func getSuperpositionBounds(points []Point) (leftBottom, leftTop, rightTop, rightBottom Point) {
 	var (
 		left   = points[0].X
 		bottom = points[0].Y
@@ -99,11 +70,39 @@ func getBounds(points []Point) (leftBottom, leftTop, rightTop, rightBottom Point
 	return leftBottom, leftTop, rightTop, rightBottom
 }
 
-func addEdgePointsToMap(m map[Edge]struct{}, a, b Point) {
-	var edge = newEdgeFromTwoPoints(a, b)
-	if _, ok := m[edge]; ok {
-		delete(m, edge)
+func addPointToTriangleSet(p Point, set triangleSet) {
+	var edgesForNewTriangles = make(map[Edge]struct{})
+	for t := range set.triangles {
+		if p.isInTriangleCircumcircle(t) {
+			set.Remove(t)
+			addEdgeToMap(edgesForNewTriangles, newEdgeFromTwoPoints(t.A, t.B))
+			addEdgeToMap(edgesForNewTriangles, newEdgeFromTwoPoints(t.B, t.C))
+			addEdgeToMap(edgesForNewTriangles, newEdgeFromTwoPoints(t.C, t.A))
+		}
+	}
+
+	var newTriangles = make([]Triangle, 0)
+	for e := range edgesForNewTriangles {
+		newTriangles = append(newTriangles, newTriangleFromPoints(e.A, e.B, p))
+	}
+
+	for _, newTriangle := range newTriangles {
+		set.Add(newTriangle)
+	}
+}
+
+func addEdgeToMap(m map[Edge]struct{}, e Edge) {
+	if _, ok := m[e]; ok {
+		delete(m, e)
 	} else {
-		m[edge] = struct{}{}
+		m[e] = struct{}{}
+	}
+}
+
+func removeSuperpositionFromTriangleSet(set triangleSet) {
+	for t := range set.triangles {
+		if t.hasPoints(set.leftBottom, set.leftTop, set.rightTop, set.rightBottom) {
+			set.Remove(t)
+		}
 	}
 }
