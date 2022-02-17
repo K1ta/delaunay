@@ -1,6 +1,10 @@
 package delaunay
 
-import "github.com/go-gl/mathgl/mgl64"
+import (
+	"fmt"
+
+	"github.com/go-gl/mathgl/mgl64"
+)
 
 type Triangle struct {
 	A Point
@@ -37,4 +41,8 @@ func (t *Triangle) hasPoints(points ...Point) bool {
 		}
 	}
 	return false
+}
+
+func (t Triangle) String() string {
+	return fmt.Sprintf("{%s %s %s}", t.A, t.B, t.C)
 }

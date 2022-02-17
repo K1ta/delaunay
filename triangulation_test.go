@@ -1,7 +1,9 @@
 package delaunay
 
 import (
+	"math/rand"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -9,35 +11,50 @@ func TestTriangulate(t *testing.T) {
 	type args struct {
 		points []Point
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    []Triangle
-		wantErr bool
-	}{
-		{
-			name: "",
-			args: args{points: []Point{
-				{X: 0, Y: 0},
-				{X: 0, Y: 1},
-				{X: 1, Y: 1},
-				{X: 1, Y: 0},
-			}},
-			want: []Triangle{},
-		},
+	type testCase struct {
+		name string
+		args args
 	}
+
+	var tests = make([]testCase, 100)
+	for i := range tests {
+		tests[i] = testCase{
+			name: strconv.Itoa(i),
+			args: args{
+				points: generatePoints(100, -100, 100),
+			},
+		}
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Triangulate(tt.args.points)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Triangulate() error = %v, wantErr %v", err, tt.wantErr)
+			triangles, err := Triangulate(tt.args.points)
+			if err != nil {
+				t.Errorf("Triangulate() error = %v", err)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Triangulate() got = %v, want %v", got, tt.want)
+			for _, triangle := range triangles {
+				for _, point := range tt.args.points {
+					if triangle.hasPoints(point) {
+						continue
+					}
+					if point.isInTriangleCircumcircle(triangle) {
+						t.Errorf("Point %s is in triangle %s", point, triangle)
+					}
+				}
 			}
 		})
 	}
+}
+
+func generatePoints(n int, min, max float64) []Point {
+	var points = make([]Point, n)
+	for i := 0; i < n; i++ {
+		x := min + rand.Float64()*(max-min)
+		y := min + rand.Float64()*(max-min)
+		points[i] = Point{X: x, Y: y}
+	}
+	return points
 }
 
 func Test_isClockwise(t *testing.T) {
@@ -50,7 +67,7 @@ func Test_isClockwise(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "",
+			name: "Clockwise",
 			args: args{
 				t: Triangle{
 					A: Point{X: 0, Y: 0},
@@ -61,7 +78,7 @@ func Test_isClockwise(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "",
+			name: "Clockwise with offset points",
 			args: args{
 				t: Triangle{
 					A: Point{X: 1, Y: 0},
@@ -72,7 +89,7 @@ func Test_isClockwise(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "",
+			name: "Not clockwise",
 			args: args{
 				t: Triangle{
 					A: Point{X: 0, Y: 0},
@@ -104,6 +121,7 @@ func Test_getTriangleOfPoints(t *testing.T) {
 		want Triangle
 	}{
 		{
+			name: "Create as is",
 			args: args{
 				a: Point{X: 0, Y: 0},
 				b: Point{X: 0, Y: 1},
@@ -116,6 +134,7 @@ func Test_getTriangleOfPoints(t *testing.T) {
 			},
 		},
 		{
+			name: "Make clockwise",
 			args: args{
 				a: Point{X: 0, Y: 0},
 				b: Point{X: 1, Y: 0},
