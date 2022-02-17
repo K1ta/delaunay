@@ -1,4 +1,4 @@
-module delaunay
+module github.com/K1ta/delaunay
 
 go 1.17
 
