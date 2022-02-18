@@ -31,7 +31,7 @@ func createTriangleSetWithSuperposition(points []Point) triangleSet {
 		leftBottom:  leftBottom,
 		leftTop:     leftTop,
 		rightTop:    rightTop,
-		rightBottom: leftBottom,
+		rightBottom: rightBottom,
 	}
 
 	return set
